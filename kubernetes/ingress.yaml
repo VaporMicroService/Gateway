@@ -1,0 +1,8 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: api-gateway
+spec:
+  backend:
+    serviceName: api-gateway
+    servicePort: 80
