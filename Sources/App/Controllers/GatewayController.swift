@@ -14,7 +14,7 @@ final class GatewayController {
     func handler(_ req: Request) throws -> Future<Response> {
         guard
             let service = req.http.urlString.split(separator: "/", maxSplits: 1, omittingEmptySubsequences: true).first,
-            let hostData = Environment.get("HOST:\(service)")
+            let hostData = Environment.get("HOST_\(service)")
             else { throw Abort(.badRequest) }
         let configuration = try JSONDecoder().decode(ServiceConfiguration.self, from: hostData.convertToData())
         return try handler(req, configuration: configuration)
