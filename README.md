@@ -37,7 +37,7 @@ For example given path: `/user/abc/123` would be recognized as `user` service.
 
 Configuration is loaded via enviromental variables where:
 
-variable name is `HOST:{service}` in this case `user` which would be `HOST:user`
+variable name is `HOST_{service}` in this case `user` which would be `HOST_user`
 as value it should be JSON containing data such as:
 
 1. Host
