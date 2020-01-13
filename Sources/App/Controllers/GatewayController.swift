@@ -41,12 +41,8 @@ final class GatewayController {
         }
         
         guard let url = Environment.get("AUTH") else { throw Abort(.badRequest) }
-        
-        var headers = HTTPHeaders()
-        if let bearer = request.http.headers.bearerAuthorization {
-            headers.replaceOrAdd(name: .authorization, value: "Bearer \(bearer.token)")
-        }
-        return client.send(.GET, headers: headers, to: url).map { response -> Request in
+
+        return client.send(.GET, headers: request.http.headers, to: url).map { response -> Request in
             let identifier = try response.content.syncDecode(ObjectIdentifier.self)
             request.http.headers.add(name: .contentID, value: String(identifier.id))
             return request
