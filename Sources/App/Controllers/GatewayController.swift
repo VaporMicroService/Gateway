@@ -27,20 +27,25 @@ final class GatewayController {
         }
         req.http.url = host.appendingPathComponent(req.http.urlString)
         req.http.headers.replaceOrAdd(name: "host", value: host.absoluteString)
-        if configuration.loginRequired {
-            return try authenticated(to: req, with: client).flatMap {
-                return client.send($0)
-            }
-        }
-        return client.send(req)
+        return authenticated(to: req, with: client)?.flatMap {
+            return client.send($0)
+        } ?? client.send(req)
     }
     
-    func authenticated(to request: Request, with client: Client) throws -> Future<Request> {
+    func authenticated(to request: Request, with client: Client) -> Future<Request>? {
         struct ObjectIdentifier: Content {
             var id: Int
         }
         
-        guard let url = Environment.get("AUTH") else { throw Abort(.badRequest) }
+        guard let url = Environment.get("AUTH") else {
+            print("🚪 AUTH env. variable is missing.")
+            return nil
+        }
+        
+        guard let bearer = request.http.headers.firstValue(name: .authorization), bearer.starts(with: "Bearer ")  else {
+            print("🚪 Skipping auth, bearer authorization header missing")
+            return nil
+        }
 
         return client.send(.GET, headers: request.http.headers, to: url).map { response -> Request in
             let identifier = try response.content.syncDecode(ObjectIdentifier.self)
