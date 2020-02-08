@@ -48,8 +48,10 @@ final class GatewayController {
         }
 
         return client.send(.GET, headers: request.http.headers, to: url).map { response -> Request in
-            let identifier = try response.content.syncDecode(ObjectIdentifier.self)
-            request.http.headers.add(name: .contentID, value: String(identifier.id))
+            print("Requesting user id with status: \(response.http.status)")
+            if let identifier = try? response.content.syncDecode(ObjectIdentifier.self) {
+                request.http.headers.add(name: .contentID, value: String(identifier.id))
+            }
             return request
         }
     }
