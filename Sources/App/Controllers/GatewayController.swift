@@ -25,7 +25,7 @@ final class GatewayController {
         guard let host = configuration.host else {
             throw Abort(.internalServerError)
         }
-        req.http.url = host.appendingPathComponent(req.http.urlString)
+        req.http.url = host.appendingPathComponent(req.http.urlString.removingPercentEncoding ?? req.http.urlString)
         req.http.headers.replaceOrAdd(name: "host", value: host.absoluteString)
         return authenticated(to: req, with: client)?.flatMap {
             return client.send($0)
