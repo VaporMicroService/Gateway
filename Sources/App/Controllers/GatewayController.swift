@@ -29,7 +29,7 @@ final class GatewayController {
         let route = host.appendingPathComponent(req.http.url.path)
         var components = URLComponents(url: route, resolvingAgainstBaseURL: false)
         
-        if let query = req.http.url.query {
+        if let query = req.http.url.query?.removingPercentEncoding {
             components?.query = query
         }
 
