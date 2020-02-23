@@ -23,9 +23,21 @@ final class GatewayController {
     func handler(_ req: Request, configuration: ServiceConfiguration) throws -> Future<Response> {
         let client = try req.make(Client.self)
         guard let host = configuration.host else {
-            throw Abort(.internalServerError)
+            throw Abort(.custom(code: 511, reasonPhrase: "Gateway host url is missing"))
         }
-        req.http.url = host.appendingPathComponent(req.http.urlString.removingPercentEncoding ?? req.http.urlString)
+        
+        let route = host.appendingPathComponent(req.http.url.path)
+        var components = URLComponents(url: route, resolvingAgainstBaseURL: false)
+        
+        if let query = req.http.url.query {
+            components?.query = query
+        }
+
+        guard let url = components?.url else {
+            throw Abort(.custom(code: 511, reasonPhrase: "Unable to create URL from the components."))
+        }
+        
+        req.http.url = url
         req.http.headers.replaceOrAdd(name: "host", value: host.absoluteString)
         return authenticated(to: req, with: client)?.flatMap {
             return client.send($0)
